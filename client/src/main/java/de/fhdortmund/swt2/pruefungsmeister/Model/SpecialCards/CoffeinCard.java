@@ -1,6 +1,6 @@
 package de.fhdortmund.swt2.pruefungsmeister.Model.SpecialCards;
 
-import de.fhdortmund.swt2.pruefungsmeister.Controller.Player;
+import de.fhdortmund.swt2.pruefungsmeister.Model.Player;
 
 /**
  * Created by jonas on 23.05.17.
