@@ -43,10 +43,85 @@ public class Game {
                 currentPlayer = p;
                 chooseAction();
                 System.out.println("");
+                generateResources();
             }
-
-            generateResources();
             round++;
+        }
+    }
+
+    private void trade() {
+        System.out.println("1. Fastfood");
+        System.out.println("2. Energydrinks");
+        System.out.println("3. Bonuspunkte");
+        System.out.println("4. Lernstoff");
+        System.out.println("5. Technik");
+
+        System.out.println("Was willst du verkaufen?");
+        int sell = new Scanner(System.in).nextInt();
+        System.out.println("Was willst du verkaufen?");
+        int buy = new Scanner(System.in).nextInt();
+
+        boolean allowed = false;
+
+        switch (sell) {
+            case 1:
+                if(currentPlayer.getFastfood() >= 3) {
+                    currentPlayer.setFastfood(currentPlayer.getFastfood() - 3);
+                    allowed = true;
+                }
+                break;
+            case 2:
+                if(currentPlayer.getEnergydrinks() >= 3) {
+                    currentPlayer.setEnergydrinks(currentPlayer.getEnergydrinks() - 3);
+                    allowed = true;
+                }
+                break;
+            case 3:
+                if(currentPlayer.getExtrapoints() >= 3) {
+                    currentPlayer.setExtrapoints(currentPlayer.getExtrapoints() - 3);
+                    allowed = true;
+                }
+                break;
+            case 4:
+                if(currentPlayer.getTechnology() >= 3) {
+                    currentPlayer.setTechnology(currentPlayer.getTechnology() - 3);
+                    allowed = true;
+                }
+                break;
+            case 5:
+                if(currentPlayer.getKnowhow() >= 3) {
+                    currentPlayer.setKnowhow(currentPlayer.getKnowhow() - 3);
+                    allowed = true;
+                }
+                break;
+            default:
+                break;
+        }
+
+        if(!allowed) {
+            System.out.println("Leider hast du nicht genügend resourcen zum handeln");
+            return;
+        }
+
+        switch (buy) {
+            case 1:
+                currentPlayer.setFastfood(currentPlayer.getFastfood() + 1);
+                break;
+            case 2:
+                currentPlayer.setEnergydrinks(currentPlayer.getEnergydrinks() + 1);
+                break;
+            case 3:
+                currentPlayer.setExtrapoints(currentPlayer.getExtrapoints() + 1);
+                break;
+            case 4:
+                currentPlayer.setTechnology(currentPlayer.getTechnology() + 1);
+                break;
+            case 5:
+                currentPlayer.setKnowhow(currentPlayer.getKnowhow() + 1);
+                break;
+            default:
+                System.out.println("Diese resource gibt es nicht. Aber deinen Einsatz nehmen wir trotzdem.");
+                break;
         }
     }
 
@@ -102,6 +177,7 @@ public class Game {
                 buildGroup();
                 break;
             case 3:
+                trade();
                 break;
             case 4:
                 break;
