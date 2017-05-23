@@ -13,6 +13,7 @@ public class Player {
     private int extrapoints;
     private int knowhow;
     private int technology;
+    private int exams;
 
 
     public Player(String name) {
@@ -71,5 +72,13 @@ public class Player {
 
     public void setTechnology(int technology) {
         this.technology = technology;
+    }
+
+    public int getExams() {
+        return exams;
+    }
+
+    public void setExams(int exams) {
+        this.exams = exams;
     }
 }

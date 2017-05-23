@@ -294,6 +294,11 @@ public class Game {
             currentPlayer.setTechnology(currentPlayer.getTechnology() - 1);
             currentPlayer.setFastfood(currentPlayer.getFastfood() - 1);
             currentPlayer.setEnergydrinks(currentPlayer.getEnergydrinks() - 1);
+            currentPlayer.setExams(currentPlayer.getExams() + 1);
+            if(currentPlayer.getExams() >= 12) {
+                System.out.println(currentPlayer.getName() + " hat gewonnen");
+                System.exit(1);
+            }
 
         } else {
             System.out.println("Leider reichen deine connections nicht bis hier!");
