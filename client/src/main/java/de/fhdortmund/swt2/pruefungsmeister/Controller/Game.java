@@ -1,5 +1,7 @@
 package de.fhdortmund.swt2.pruefungsmeister.Controller;
 
+import de.fhdortmund.swt2.pruefungsmeister.Controller.SpecialCards.SpecialCard;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -180,6 +182,7 @@ public class Game {
                 trade();
                 break;
             case 4:
+                generateSpecialCard();
                 break;
             case 5:
                 return;
@@ -188,6 +191,15 @@ public class Game {
         }
 
         chooseAction();
+    }
+
+    private void generateSpecialCard() {
+        if(currentPlayer.getExtrapoints() >= 1) {
+            currentPlayer.setExtrapoints(currentPlayer.getExtrapoints() - 1);
+            SpecialCard.randomCard().apply(currentPlayer);
+        } else {
+            System.out.println("Leider hast du keine Bonuspunkte. Geh studieren!");
+        }
     }
 
     private void buildContact() {
