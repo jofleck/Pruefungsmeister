@@ -1,4 +1,4 @@
-package de.fhdortmund.swt2.pruefungsmeister.Controller;
+package de.fhdortmund.swt2.pruefungsmeister.Model;
 
 import java.util.LinkedList;
 import java.util.List;

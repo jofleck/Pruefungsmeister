@@ -1,4 +1,4 @@
-package de.fhdortmund.swt2.pruefungsmeister.Controller.SpecialCards;
+package de.fhdortmund.swt2.pruefungsmeister.Model.SpecialCards;
 
 import de.fhdortmund.swt2.pruefungsmeister.Controller.Player;
 

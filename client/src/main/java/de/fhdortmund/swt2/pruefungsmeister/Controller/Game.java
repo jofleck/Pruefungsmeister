@@ -1,6 +1,7 @@
 package de.fhdortmund.swt2.pruefungsmeister.Controller;
 
-import de.fhdortmund.swt2.pruefungsmeister.Controller.SpecialCards.SpecialCard;
+import de.fhdortmund.swt2.pruefungsmeister.Model.Edge;
+import de.fhdortmund.swt2.pruefungsmeister.Model.SpecialCards.SpecialCard;
 
 import java.util.Arrays;
 import java.util.LinkedList;
