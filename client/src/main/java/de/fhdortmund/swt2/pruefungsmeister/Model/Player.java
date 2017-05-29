@@ -1,9 +1,11 @@
 package de.fhdortmund.swt2.pruefungsmeister.Model;
 
+import java.util.Observable;
+
 /**
  * Created by jonas on 22.05.17.
  */
-public class Player {
+public class Player extends Observable {
     private static int count;
     private int id;
     private String name;
@@ -80,5 +82,7 @@ public class Player {
 
     public void setExams(int exams) {
         this.exams = exams;
+        setChanged();
+        notifyObservers();
     }
 }

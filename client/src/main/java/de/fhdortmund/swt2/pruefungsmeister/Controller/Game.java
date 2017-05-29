@@ -1,19 +1,17 @@
 package de.fhdortmund.swt2.pruefungsmeister.Controller;
 
 import de.fhdortmund.swt2.pruefungsmeister.Model.*;
+import de.fhdortmund.swt2.pruefungsmeister.Model.Map;
 import de.fhdortmund.swt2.pruefungsmeister.Model.SpecialCards.SpecialCard;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Created by jonas on 22.05.17.
  */
-public class Game {
+public class Game implements Observer{
 
-    public List<Player> players;
+    private List<Player> players;
     private Player currentPlayer;
     private Map map;
     private int round;
@@ -36,7 +34,9 @@ public class Game {
             System.out.format("Bitte den Namen von Spieler %d eingeben:", i+1);
             System.out.println("\n");
             String name = sc.nextLine();
-            players.add(new Player(name));
+            Player p = new Player(name);
+            p.addObserver(this);
+            players.add(p);
             System.out.println("Hallo " + name);
         }
 
@@ -308,5 +308,11 @@ public class Game {
     }
 
 
-
+    @Override
+    public void update(Observable o, Object arg) {
+        if(o instanceof Player) {
+            Player p = (Player)o;
+            System.out.println(p.getName() + " hat jetzt " + p.getExams() + " Klausuren bestanden");
+        }
+    }
 }
