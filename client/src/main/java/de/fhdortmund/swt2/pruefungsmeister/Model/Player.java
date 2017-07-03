@@ -1,12 +1,18 @@
 package de.fhdortmund.swt2.pruefungsmeister.Model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Observable;
 
 /**
  * Created by jonas on 22.05.17.
  */
+@Entity
+@Table(name = "Player")
 public class Player extends Observable {
     private static int count;
+    @Id
     private int id;
     private String name;
 

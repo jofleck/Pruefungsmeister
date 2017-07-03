@@ -3,6 +3,8 @@ package de.fhdortmund.swt2.pruefungsmeister.Controller;
 import de.fhdortmund.swt2.pruefungsmeister.Model.*;
 import de.fhdortmund.swt2.pruefungsmeister.Model.Map;
 import de.fhdortmund.swt2.pruefungsmeister.Model.SpecialCards.SpecialCard;
+import de.fhdortmund.swt2.pruefungsmeister.Persistence.PersistenceManager;
+import de.fhdortmund.swt2.pruefungsmeister.Persistence.PruefungsmeisterDAO;
 
 import java.util.*;
 
@@ -14,15 +16,20 @@ public class Game implements Observer{
     private List<Player> players;
     private Player currentPlayer;
     private Map map;
+    private PruefungsmeisterDAO dao;
     private int round;
 
     public Game() {
         players = new LinkedList<Player>();
         map = new Map();
+        dao = new PersistenceManager();
     }
 
     public void start() {
 
+        dao.beginTransaction();
+        dao.deleteAllPlayers();
+        dao.commitTransaction();
         Scanner sc = new Scanner(System.in);
         System.out.println("Herzlich Willkommen bei Prüfungsmeister, dem wohl realistischten Konsolengame des Planeten!");
         System.out.print("Wie viele Spieler seid ihr?");
@@ -37,6 +44,9 @@ public class Game implements Observer{
             Player p = new Player(name);
             p.addObserver(this);
             players.add(p);
+            dao.beginTransaction();
+            dao.persist(p);
+            dao.commitTransaction();
             System.out.println("Hallo " + name);
         }
 
@@ -47,6 +57,11 @@ public class Game implements Observer{
                 chooseAction();
                 System.out.println("");
                 generateResources();
+                dao.beginTransaction();
+                for(Player pl: players) {
+                    dao.update(pl);
+                }
+                dao.commitTransaction();
             }
             round++;
         }
