@@ -3,6 +3,7 @@ package de.fhdortmund.swt2.pruefungsmeister.Model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.Observable;
 
 /**
@@ -15,6 +16,7 @@ public class Player extends Observable {
     @Id
     private int id;
     private String name;
+    private LocalDateTime lastUpdate;
 
     private int energydrinks;
     private int fastfood;
@@ -84,6 +86,22 @@ public class Player extends Observable {
 
     public int getExams() {
         return exams;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public LocalDateTime getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(LocalDateTime lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 
     public void setExams(int exams) {

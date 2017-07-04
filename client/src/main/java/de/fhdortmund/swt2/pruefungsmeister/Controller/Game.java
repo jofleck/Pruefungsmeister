@@ -6,6 +6,7 @@ import de.fhdortmund.swt2.pruefungsmeister.Model.SpecialCards.SpecialCard;
 import de.fhdortmund.swt2.pruefungsmeister.Persistence.PersistenceManager;
 import de.fhdortmund.swt2.pruefungsmeister.Persistence.PruefungsmeisterDAO;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -44,6 +45,7 @@ public class Game implements Observer{
             Player p = new Player(name);
             p.addObserver(this);
             players.add(p);
+            p.setLastUpdate(LocalDateTime.now());
             dao.beginTransaction();
             dao.persist(p);
             dao.commitTransaction();
@@ -59,6 +61,7 @@ public class Game implements Observer{
                 generateResources();
                 dao.beginTransaction();
                 for(Player pl: players) {
+                    pl.setLastUpdate(LocalDateTime.now());
                     dao.update(pl);
                 }
                 dao.commitTransaction();
