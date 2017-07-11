@@ -38,7 +38,7 @@ public class Game implements Observer{
 
     private void initSocketIO() {
         Configuration config = new Configuration();
-        config.setHostname("localhost");
+        //config.setHostname("localhost");
         config.setPort(9092);
 
         server = new SocketIOServer(config);
@@ -348,13 +348,6 @@ public class Game implements Observer{
             if(k.getOwner() == currentPlayer) {
                 allowed = true;
                 break;
-            }
-
-            for(Edge e : k.getEdges()) {
-                if(e.getOwner() == currentPlayer) {
-                    allowed = true;
-                    break;
-                }
             }
             if(allowed)
                 break;
