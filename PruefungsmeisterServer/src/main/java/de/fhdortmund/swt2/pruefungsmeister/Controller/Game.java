@@ -111,6 +111,18 @@ public class Game implements Observer{
 
             }
         });
+        server.addEventListener("specialCard", String.class, new DataListener<String>() {
+            @Override
+            public void onData(SocketIOClient socketIOClient, String json, AckRequest ackRequest) throws Exception {
+                if(!verifyClient(socketIOClient)) {
+                    socketIOClient.sendEvent("message", "Darf der das? Nö!");
+                    return;
+                }
+                socketIOClient.sendEvent("message", generateSpecialCard());
+                sendPlayerInformationToAllPlayers();
+
+            }
+        });
         server.start();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down");

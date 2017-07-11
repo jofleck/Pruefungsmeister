@@ -35,6 +35,8 @@ public class MainViewController {
     Button btnFinishTurn;
     @FXML
     Button btnTrade;
+    @FXML
+    Button btnSpecialCard;
 
     //Kontakte
     @FXML Circle c0;
@@ -410,6 +412,7 @@ public class MainViewController {
             socket.emit("join", name);
         }
 
+
     }
 
     private void initActionHandlers() {
@@ -423,6 +426,12 @@ public class MainViewController {
         }
         btnFinishTurn.setOnAction((e) -> finishTurn());
         btnTrade.setOnAction((e) -> trade());
+        btnSpecialCard.setOnAction((e) -> specialCard());
+
+    }
+
+    private void specialCard() {
+        socket.emit("specialCard");
     }
 
     private void trade() {

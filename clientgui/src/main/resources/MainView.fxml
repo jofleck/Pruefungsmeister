@@ -11,7 +11,7 @@
 <?import javafx.scene.text.Font?>
 
 <AnchorPane prefHeight="400.0" prefWidth="608.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.fhdortmund.swt2.pruefungsmeister.client.Controller.MainViewController">
-   <Button fx:id="btnFinishTurn" contentDisplay="RIGHT" layoutX="390.0" layoutY="309.0" prefHeight="80.0" prefWidth="92.0" text="Zug Ende" />
+   <Button fx:id="btnFinishTurn" contentDisplay="RIGHT" layoutX="390.0" layoutY="309.0" prefHeight="80.0" prefWidth="110.0" text="Zug Ende" />
    <Label layoutX="369.0" layoutY="0.0" prefHeight="25.0" prefWidth="85.0" text="Energydrinks" />
    <Label layoutX="369.0" layoutY="20.0" prefHeight="25.0" prefWidth="85.0" text="Technik" />
    <Label layoutX="369.0" layoutY="40.0" prefHeight="25.0" prefWidth="85.0" text="Lernstoff" />
@@ -23,9 +23,9 @@
    <Label fx:id="lblFastfood" layoutX="456.0" layoutY="60.0" pickOnBounds="false" prefHeight="25.0" prefWidth="30.0" text="0" />
    <Label fx:id="lblExtrapoints" layoutX="456.0" layoutY="80.0" pickOnBounds="false" prefHeight="25.0" prefWidth="30.0" text="0" />
    <TextArea fx:id="output" layoutX="367.0" layoutY="101.0" prefHeight="67.0" prefWidth="235.0" text="Text" />
-   <Button fx:id="btnTrade" contentDisplay="RIGHT" layoutX="499.0" layoutY="308.0" prefHeight="80.0" prefWidth="92.0" text="Handeln" />
-   <Button fx:id="btnLerngruppe" contentDisplay="RIGHT" layoutX="499.0" layoutY="219.0" prefHeight="80.0" prefWidth="92.0" text="Lerngruppe" />
-   <Button fx:id="btnEreignisskarte" contentDisplay="RIGHT" layoutX="390.0" layoutY="221.0" prefHeight="80.0" prefWidth="92.0" text="Ereignisskarte" />
+   <Button fx:id="btnTrade" contentDisplay="RIGHT" layoutX="517.0" layoutY="309.0" prefHeight="80.0" prefWidth="110.0" text="Handeln" />
+   <Button fx:id="btnFoo" contentDisplay="RIGHT" layoutX="517.0" layoutY="221.0" prefHeight="80.0" prefWidth="110.0" text="Nicht drücken!" />
+   <Button fx:id="btnSpecialCard" contentDisplay="RIGHT" layoutX="390.0" layoutY="221.0" prefHeight="80.0" prefWidth="110.0" text="Ereignisskarte" />
    <ImageView fitHeight="397.0" fitWidth="397.0" layoutX="-35.0" layoutY="1.0" pickOnBounds="true" preserveRatio="true">
       <image>
          <Image url="@../java/de/fhdortmund/swt2/pruefungsmeister/client/Christian.jpg" />
