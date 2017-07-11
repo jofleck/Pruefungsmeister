@@ -9,9 +9,9 @@ import de.fhdortmund.swt2.pruefungsmeister.Model.Player;
 public class ContactCard extends SpecialCard {
 
     @Override
-    public void apply(Player p) {
+    public String apply(Player p) {
         p.setKnowhow(p.getKnowhow() + 1);
-        System.out.println("Du bist zur Sprechstunde deines Dozenten gegangen und hast " +
+        return String.format("Du bist zur Sprechstunde deines Dozenten gegangen und hast " +
                 "jetzt endlich die Vorlesung verstanden. Du kriegst einen Wissenspunkt.");
 
     }

@@ -8,7 +8,7 @@ import de.fhdortmund.swt2.pruefungsmeister.Model.Player;
  */
 public abstract class SpecialCard {
 
-    public abstract void apply(Player p);
+    public abstract String apply(Player p);
 
     public static SpecialCard randomCard() {
         int random = (int) (Math.random() * 4);

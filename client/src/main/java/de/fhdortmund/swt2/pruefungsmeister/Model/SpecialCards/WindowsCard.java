@@ -8,13 +8,13 @@ import de.fhdortmund.swt2.pruefungsmeister.Model.Player;
  */
 public class WindowsCard extends SpecialCard {
     @Override
-    public void apply(Player p) {
+    public String apply(Player p) {
         if(p.getTechnology() > 2) {
             p.setTechnology(p.getTechnology() - 2);
         } else {
             p.setTechnology(0);
         }
-        System.out.format("Windows installiert Updates als du eine Präsentation halten willst . Du verlierst 2 Technik." +
+        return String.format("Windows installiert Updates als du eine Präsentation halten willst . Du verlierst 2 Technik." +
                 " Du hast jetzt %d Technik.%n", p.getTechnology());
     }
 }

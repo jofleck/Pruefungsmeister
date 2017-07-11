@@ -8,13 +8,13 @@ import de.fhdortmund.swt2.pruefungsmeister.Model.Player;
 public class CoffeinCard extends SpecialCard{
 
     @Override
-    public void apply(Player p) {
+    public String apply(Player p) {
         if(p.getEnergydrinks() > 3) {
             p.setEnergydrinks(p.getEnergydrinks() - 3);
         } else {
             p.setEnergydrinks(0);
         }
-        System.out.format("Du bist Koffein süchtig geworden. Du verlierst 3 Energydrinks." +
+       return String.format("Du bist Koffein süchtig geworden. Du verlierst 3 Energydrinks." +
                 " Du hast jetzt %d Energydrinks%n", p.getEnergydrinks());
 
     }
