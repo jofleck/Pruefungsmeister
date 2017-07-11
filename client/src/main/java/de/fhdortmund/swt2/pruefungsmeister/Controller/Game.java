@@ -1,5 +1,12 @@
 package de.fhdortmund.swt2.pruefungsmeister.Controller;
 
+import com.corundumstudio.socketio.AckRequest;
+import com.corundumstudio.socketio.Configuration;
+import com.corundumstudio.socketio.SocketIOClient;
+import com.corundumstudio.socketio.SocketIOServer;
+import com.corundumstudio.socketio.listener.DataListener;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import de.fhdortmund.swt2.pruefungsmeister.Model.*;
 import de.fhdortmund.swt2.pruefungsmeister.Model.Map;
 import de.fhdortmund.swt2.pruefungsmeister.Model.SpecialCards.SpecialCard;
@@ -14,11 +21,14 @@ import java.util.*;
  */
 public class Game implements Observer{
 
+    private SocketIOServer server;
+
     private List<Player> players;
     private Player currentPlayer;
     private Map map;
     private PruefungsmeisterDAO dao;
     private int round;
+    private boolean playing;
 
     public Game() {
         players = new LinkedList<Player>();
@@ -26,90 +36,198 @@ public class Game implements Observer{
         dao = new PersistenceManager();
     }
 
-    public void start() {
+    private void initSocketIO() {
+        Configuration config = new Configuration();
+        config.setHostname("localhost");
+        config.setPort(9092);
 
-        dao.beginTransaction();
-        dao.deleteAllPlayers();
-        dao.commitTransaction();
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Herzlich Willkommen bei Prüfungsmeister, dem wohl realistischten Konsolengame des Planeten!");
-        System.out.print("Wie viele Spieler seid ihr?");
+        server = new SocketIOServer(config);
+        server.addEventListener("join", String.class, new DataListener<String>() {
+            @Override
+            public void onData(SocketIOClient socketIOClient, String name, AckRequest ackRequest) throws Exception {
+                if(!playing) {
+                    Player p = new Player(name);
+                    p.setClient(socketIOClient);
+                    socketIOClient.sendEvent("message", "Du nimmst am Spiel teil");
+                    addPlayer(p);
+                    sendMapToAllPlayers();
+                    sendPlayerInformationToAllPlayers();
+                } else {
+                    socketIOClient.sendEvent("message", "Das Spiel hat schon angefangen");
+                }
+            }
+        });
 
-        int playerCount = sc.nextInt();
-        sc.nextLine();
+        server.addEventListener("buildGroup", int.class, new DataListener<Integer>() {
+            @Override
+            public void onData(SocketIOClient socketIOClient, Integer knotNumber, AckRequest ackRequest) throws Exception {
+                if(!verifyClient(socketIOClient)) {
+                    socketIOClient.sendEvent("message", "Darf der das? Nö!");
+                    return;
+                }
+                socketIOClient.sendEvent("message", buildGroup(knotNumber));
+                System.out.println("Test123");
+                sendMapToAllPlayers();
+                sendPlayerInformationToAllPlayers();
 
-        for (int i = 0; i < playerCount; i++) {
-            System.out.format("Bitte den Namen von Spieler %d eingeben:", i+1);
-            System.out.println("\n");
-            String name = sc.nextLine();
-            Player p = new Player(name);
-            p.addObserver(this);
-            players.add(p);
-            p.setLastUpdate(LocalDateTime.now());
-            dao.beginTransaction();
-            dao.persist(p);
-            dao.commitTransaction();
-            System.out.println("Hallo " + name);
+            }
+        });
+
+        server.addEventListener("buildContact", int.class, new DataListener<Integer>() {
+            @Override
+            public void onData(SocketIOClient socketIOClient, Integer edgeNumber, AckRequest ackRequest) throws Exception {
+                if(!verifyClient(socketIOClient)) {
+                    socketIOClient.sendEvent("message", "Darf der das? Nö!");
+                    return;
+                }
+                socketIOClient.sendEvent("message", buildContact(edgeNumber));
+                sendMapToAllPlayers();
+                sendPlayerInformationToAllPlayers();
+
+            }
+        });
+        server.addEventListener("finishTurn", int.class, new DataListener<Integer>() {
+            @Override
+            public void onData(SocketIOClient socketIOClient, Integer edgeNumber, AckRequest ackRequest) throws Exception {
+                if(!verifyClient(socketIOClient)) {
+                    socketIOClient.sendEvent("message", "Darf der das? Nö!");
+                    return;
+                }
+                nextPlayer();
+
+            }
+        });
+        server.addEventListener("trade", String.class, new DataListener<String>() {
+            @Override
+            public void onData(SocketIOClient socketIOClient, String json, AckRequest ackRequest) throws Exception {
+                if(!verifyClient(socketIOClient)) {
+                    socketIOClient.sendEvent("message", "Darf der das? Nö!");
+                    return;
+                }
+                Gson gson = new Gson();
+                Resource[] resources = gson.fromJson(json, Resource[].class);
+                socketIOClient.sendEvent("message", trade(resources));
+                sendPlayerInformationToAllPlayers();
+
+            }
+        });
+        server.start();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutting down");
+            for(Player p : players) {
+                p.getClient().disconnect();
+            }
+            server.stop();
+        }));
+    }
+
+
+    private void nextPlayer() {
+        if(currentPlayer == null) {
+            currentPlayer = players.get(0);
+        } else {
+            int nextPlayerId = players.indexOf(currentPlayer) +1;
+            if(nextPlayerId >= players.size()) {
+                nextPlayerId = 0;
+                round ++;
+            }
+            currentPlayer = players.get(nextPlayerId);
         }
 
-        while(true) {
-            for(Player p : players) {
-                System.out.println("");
-                currentPlayer = p;
-                chooseAction();
-                System.out.println("");
-                generateResources();
-                dao.beginTransaction();
-                for(Player pl: players) {
-                    pl.setLastUpdate(LocalDateTime.now());
-                    dao.update(pl);
-                }
-                dao.commitTransaction();
-            }
-            round++;
+        broadcastMessage(generateResources());
+        sendPlayerInformationToAllPlayers();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        broadcastMessage(currentPlayer.getName() + " ist am Zug");
+    }
+
+    private void sendPlayerInformationToAllPlayers() {
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+        for (Player p : players) {
+            p.getClient().sendEvent("playerUpdate", gson.toJson(p));
         }
     }
 
-    private void trade() {
-        System.out.println("1. Fastfood");
-        System.out.println("2. Energydrinks");
-        System.out.println("3. Bonuspunkte");
-        System.out.println("4. Lernstoff");
-        System.out.println("5. Technik");
+    private void broadcastMessage(String message) {
+        for (Player p : players) {
+            p.getClient().sendEvent("message", message);
+        }
+    }
 
-        System.out.println("Was willst du verkaufen?");
-        int sell = new Scanner(System.in).nextInt();
-        System.out.println("Was willst du verkaufen?");
-        int buy = new Scanner(System.in).nextInt();
+    private void sendMapToAllPlayers() {
+        try {
+            Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+            String mapJson = gson.toJson(map);
+            System.out.println(mapJson);
+            for (Player p : players) {
+                p.getClient().sendEvent("mapUpdate", mapJson);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    private boolean verifyClient(SocketIOClient client) {
+        if(currentPlayer == null && players.size() > 0) {
+            currentPlayer = players.get(0);
+        }
+        for(Player p : players) {
+            if(p.getClient() == client) {
+                System.out.println("Player found");
+            }
+            if(p.getClient() == client && p == currentPlayer) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void addPlayer(Player p) {
+        p.addObserver(this);
+        players.add(p);
+        p.setLastUpdate(LocalDateTime.now());
+        dao.beginTransaction();
+        dao.persist(p);
+        dao.commitTransaction();
+    }
+
+    public void start() {
+       initSocketIO();
+    }
+
+    private String trade(Resource[] resources) {
+
+        String out = "";
         boolean allowed = false;
-
-        switch (sell) {
-            case 1:
+        switch (resources[0]) {
+            case FASTFOOD:
                 if(currentPlayer.getFastfood() >= 3) {
                     currentPlayer.setFastfood(currentPlayer.getFastfood() - 3);
                     allowed = true;
                 }
                 break;
-            case 2:
+            case ENERGYDRINK:
                 if(currentPlayer.getEnergydrinks() >= 3) {
                     currentPlayer.setEnergydrinks(currentPlayer.getEnergydrinks() - 3);
                     allowed = true;
                 }
                 break;
-            case 3:
+            case EXTRA_POINTS:
                 if(currentPlayer.getExtrapoints() >= 3) {
                     currentPlayer.setExtrapoints(currentPlayer.getExtrapoints() - 3);
                     allowed = true;
                 }
                 break;
-            case 4:
+            case TECHNOLOGY:
                 if(currentPlayer.getTechnology() >= 3) {
                     currentPlayer.setTechnology(currentPlayer.getTechnology() - 3);
                     allowed = true;
                 }
                 break;
-            case 5:
+            case KNOW_HOW:
                 if(currentPlayer.getKnowhow() >= 3) {
                     currentPlayer.setKnowhow(currentPlayer.getKnowhow() - 3);
                     allowed = true;
@@ -120,35 +238,35 @@ public class Game implements Observer{
         }
 
         if(!allowed) {
-            System.out.println("Leider hast du nicht genügend resourcen zum handeln");
-            return;
+            return "Leider hast du nicht genügend resourcen zum handeln";
         }
 
-        switch (buy) {
-            case 1:
+        switch (resources[1]) {
+            case FASTFOOD:
                 currentPlayer.setFastfood(currentPlayer.getFastfood() + 1);
                 break;
-            case 2:
+            case ENERGYDRINK:
                 currentPlayer.setEnergydrinks(currentPlayer.getEnergydrinks() + 1);
                 break;
-            case 3:
+            case EXTRA_POINTS:
                 currentPlayer.setExtrapoints(currentPlayer.getExtrapoints() + 1);
                 break;
-            case 4:
+            case TECHNOLOGY:
                 currentPlayer.setTechnology(currentPlayer.getTechnology() + 1);
                 break;
-            case 5:
+            case KNOW_HOW:
                 currentPlayer.setKnowhow(currentPlayer.getKnowhow() + 1);
                 break;
             default:
-                System.out.println("Diese resource gibt es nicht. Aber deinen Einsatz nehmen wir trotzdem.");
-                break;
+                return "Diese resource gibt es nicht. Aber deinen Einsatz nehmen wir trotzdem.";
         }
+        return "Deal!";
     }
 
-    private void generateResources() {
+    private String generateResources() {
+        String out = "";
         int random = (int)((Math.random() * 11) + 2);
-        System.out.println("Es wurde gewürfelt: " + random);
+        out += "Es wurde gewürfelt: " + random+ "\n";
         MapField[] fields = Arrays.asList(map.getFields()).stream().filter((mf) -> mf.getRandomValue() == random).
                 toArray(size -> new MapField[size]);
 
@@ -175,10 +293,11 @@ public class Game implements Observer{
                             break;
 
                     }
-                    System.out.format("%s, du hast 1 %s bekommen", p.getName(), resource.toString());
+                    out += String.format("%s, du hast 1 %s bekommen\n", p.getName(), resource.toString());
                 }
             }
         }
+        return out;
     }
 
     private void chooseAction() {
@@ -188,26 +307,6 @@ public class Game implements Observer{
         System.out.println("3: Handeln");
         System.out.println("4: Ereigniskarte kaufen");
         System.out.println("5: Zug beenden");
-
-        int action = new Scanner(System.in).nextInt();
-        switch (action) {
-            case 1:
-                buildContact();
-                break;
-            case 2:
-                buildGroup();
-                break;
-            case 3:
-                trade();
-                break;
-            case 4:
-                generateSpecialCard();
-                break;
-            case 5:
-                return;
-            default:
-                System.out.println("Wer lesen kann ist klar im Vorteil! Man sollte dich sofort exmatrikulieren");
-        }
 
         chooseAction();
     }
@@ -221,25 +320,20 @@ public class Game implements Observer{
         }
     }
 
-    private void buildContact() {
+    private String buildContact(int edgeNum) {
         if(currentPlayer.getEnergydrinks() < 1 || currentPlayer.getFastfood() < 1) {
-            System.out.println("Blöderweise hast du nicht genug Verpflegung um dich einzuschleimen.");
-            return;
+           return "Blöderweise hast du nicht genug Verpflegung um dich einzuschleimen.";
         }
 
-        System.out.println("Auf Welcher strecke soll deine connection lobbyarbeit für dich verrichten?");
-        int edgeNum = new Scanner(System.in).nextInt();
 
         if(edgeNum < 0 || edgeNum > 71) {
-            System.out.println("Diese Strecke gibt es nicht");
-            return;
+           return "Diese Strecke gibt es nicht";
         }
 
         Edge edge = map.getEdges()[edgeNum];
 
         if(edge.getOwner() != null) {
-            System.out.format("Hier treibt schon %s sein unwesen!%n", edge.getOwner().getName());
-            return;
+          return String.format("Hier treibt schon %s sein unwesen!%n", edge.getOwner().getName());
         }
 
         boolean allowed = false;
@@ -265,31 +359,27 @@ public class Game implements Observer{
             System.out.println("Du hast nun eine neue Connection!");
             currentPlayer.setFastfood(currentPlayer.getFastfood() - 1);
             currentPlayer.setEnergydrinks(currentPlayer.getEnergydrinks() - 1);
+            return ("Du hast nun eine neue Connection!");
 
         } else {
-            System.out.println("Leider reichen deine connections nicht bis hier!");
+            return "Leider reichen deine connections nicht bis hier!";
         }
 
     }
 
-    private void buildGroup() {
+    private String buildGroup(int knotNum) {
         if(currentPlayer.getEnergydrinks() < 1 || currentPlayer.getFastfood() < 1 || currentPlayer.getKnowhow() < 1 || currentPlayer.getTechnology() < 1 ) {
-            System.out.println("Blöderweise hast du deiner Gruppe nicht viel entgegen zu setzen. Zieh leine!");
-            return;
+            return "Blöderweise hast du deiner Gruppe nicht viel entgegen zu setzen. Zieh leine!";
         }
 
-        System.out.println("Auf Welcher kreuzung soll deine Gruppe auf youtube videos ähhhhh lernen?");
-        int knotNum = new Scanner(System.in).nextInt();
         if(knotNum < 0 || knotNum > 53) {
-            System.out.println("Diese Krezung gibt es nicht");
-            return;
+            return "Diese Krezung gibt es nicht";
         }
 
         Knot knot = map.getKnots()[knotNum];
 
         if(knot.getOwner() != null) {
-            System.out.format("Hier treibt schon %s sein unwesen!%n", knot.getOwner().getName());
-            return;
+            return String.format("Hier treibt schon %s sein unwesen!%n", knot.getOwner().getName());
         }
 
         boolean allowed = false;
@@ -306,20 +396,19 @@ public class Game implements Observer{
 
         if(allowed) {
             knot.setOwner(currentPlayer);
-            System.out.println("Du hast nun eine neue Gruppe");
-            knot.setOwner(currentPlayer);
+            System.out.println(currentPlayer.getName());
             currentPlayer.setKnowhow(currentPlayer.getKnowhow() - 1);
             currentPlayer.setTechnology(currentPlayer.getTechnology() - 1);
             currentPlayer.setFastfood(currentPlayer.getFastfood() - 1);
             currentPlayer.setEnergydrinks(currentPlayer.getEnergydrinks() - 1);
             currentPlayer.setExams(currentPlayer.getExams() + 1);
             if(currentPlayer.getExams() >= 12) {
-                System.out.println(currentPlayer.getName() + " hat gewonnen");
-                System.exit(1);
+                return currentPlayer.getName() + " hat gewonnen";
             }
+            return "Du hast nun eine neue Gruppe";
 
         } else {
-            System.out.println("Leider reichen deine connections nicht bis hier!");
+            return "Leider reichen deine connections nicht bis hier!";
         }
 
 
