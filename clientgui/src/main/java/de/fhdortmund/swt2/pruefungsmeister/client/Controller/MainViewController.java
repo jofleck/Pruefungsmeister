@@ -1,18 +1,15 @@
 package de.fhdortmund.swt2.pruefungsmeister.client.Controller;
 
-import View.TradeDialog;
+import de.fhdortmund.swt2.pruefungsmeister.client.View.TradeDialog;
 import com.google.gson.Gson;
 import de.fhdortmund.swt2.pruefungsmeister.client.Model.*;
 import io.socket.client.IO;
 import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 

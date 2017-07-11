@@ -1,10 +1,7 @@
-package View;
+package de.fhdortmund.swt2.pruefungsmeister.client.View;
 
 import de.fhdortmund.swt2.pruefungsmeister.client.Model.Resource;
-import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
