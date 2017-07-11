@@ -1,5 +1,8 @@
 package de.fhdortmund.swt2.pruefungsmeister.Model;
 
+import com.google.gson.annotations.Expose;
+
+import javax.persistence.Transient;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,6 +12,7 @@ import java.util.List;
 public class Knot {
     private List<MapField> mapFields;
     private List<Edge> edges;
+    @Expose
     private Player owner;
 
     public Knot() {

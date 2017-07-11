@@ -1,12 +1,18 @@
 package de.fhdortmund.swt2.pruefungsmeister.Model;
 
+import com.google.gson.annotations.Expose;
+
+import javax.persistence.Transient;
+
 /**
  * Created by jonas on 22.05.17.
  */
 public class MapField {
+    @Expose
     private Resource resource;
-    private Knot[] knots;
+    private  Knot[] knots;
     private int knotCount;
+    @Expose
     private int randomValue;
 
     public MapField() {

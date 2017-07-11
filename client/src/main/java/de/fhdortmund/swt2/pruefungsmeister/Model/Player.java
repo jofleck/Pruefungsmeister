@@ -1,8 +1,13 @@
 package de.fhdortmund.swt2.pruefungsmeister.Model;
 
+import com.corundumstudio.socketio.SocketIOClient;
+import com.google.gson.annotations.Expose;
+import javafx.fxml.FXML;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.time.LocalDateTime;
 import java.util.Observable;
 
@@ -14,17 +19,26 @@ import java.util.Observable;
 public class Player extends Observable {
     private static int count;
     @Id
+    @Expose
     private int id;
+    @Expose
     private String name;
     private LocalDateTime lastUpdate;
 
+    @Expose
     private int energydrinks;
+    @Expose
     private int fastfood;
+    @Expose
     private int extrapoints;
+    @Expose
     private int knowhow;
+    @Expose
     private int technology;
+    @Expose
     private int exams;
 
+    private transient SocketIOClient client;
 
     public Player(String name) {
         this.name = name;
@@ -108,5 +122,21 @@ public class Player extends Observable {
         this.exams = exams;
         setChanged();
         notifyObservers();
+    }
+
+    public static int getCount() {
+        return count;
+    }
+
+    public static void setCount(int count) {
+        Player.count = count;
+    }
+
+    public SocketIOClient getClient() {
+        return client;
+    }
+
+    public void setClient(SocketIOClient client) {
+        this.client = client;
     }
 }

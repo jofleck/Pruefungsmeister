@@ -1,11 +1,16 @@
 package de.fhdortmund.swt2.pruefungsmeister.Model;
 
+import com.google.gson.annotations.Expose;
+
+import javax.persistence.Transient;
+
 /**
  * Created by jonas on 22.05.17.
  */
 public class Edge {
 
-    private Knot[] knots;
+    private transient Knot[] knots;
+    @Expose
     private Player owner;
 
     public Edge() {
