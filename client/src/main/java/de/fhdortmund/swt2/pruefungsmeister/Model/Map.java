@@ -1,12 +1,17 @@
 package de.fhdortmund.swt2.pruefungsmeister.Model;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * Created by jonas on 22.05.17.
  */
 public class Map {
 
+    @Expose
     private MapField[] fields;
+    @Expose
     private Knot[] knots;
+    @Expose
     private Edge[] edges;
 
     public Map() {
