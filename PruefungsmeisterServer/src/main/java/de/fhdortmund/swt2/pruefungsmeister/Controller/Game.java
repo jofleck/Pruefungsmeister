@@ -349,6 +349,13 @@ public class Game implements Observer{
                 allowed = true;
                 break;
             }
+
+            for(Edge e : k.getEdges()) {
+                if(e.getOwner() == currentPlayer) {
+                    allowed = true;
+                    break;
+                }
+            }
             if(allowed)
                 break;
         }
