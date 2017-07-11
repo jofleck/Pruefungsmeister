@@ -126,6 +126,9 @@ public class Game implements Observer{
         if(currentPlayer == null) {
             currentPlayer = players.get(0);
         } else {
+            dao.beginTransaction();
+            dao.update(currentPlayer);
+            dao.commitTransaction();
             int nextPlayerId = players.indexOf(currentPlayer) +1;
             if(nextPlayerId >= players.size()) {
                 nextPlayerId = 0;
@@ -300,23 +303,14 @@ public class Game implements Observer{
         return out;
     }
 
-    private void chooseAction() {
-        System.out.println(currentPlayer.getName() + " du bist dran");
-        System.out.println("1: Bei Komilitonen einschleimen (Kontakte)");
-        System.out.println("2: Eine Gruppe Gründen");
-        System.out.println("3: Handeln");
-        System.out.println("4: Ereigniskarte kaufen");
-        System.out.println("5: Zug beenden");
 
-        chooseAction();
-    }
 
-    private void generateSpecialCard() {
+    private String generateSpecialCard() {
         if(currentPlayer.getExtrapoints() >= 1) {
             currentPlayer.setExtrapoints(currentPlayer.getExtrapoints() - 1);
-            SpecialCard.randomCard().apply(currentPlayer);
+            return SpecialCard.randomCard().apply(currentPlayer);
         } else {
-            System.out.println("Leider hast du keine Bonuspunkte. Geh studieren!");
+            return "Leider hast du keine Bonuspunkte. Geh studieren!" ;
         }
     }
 
