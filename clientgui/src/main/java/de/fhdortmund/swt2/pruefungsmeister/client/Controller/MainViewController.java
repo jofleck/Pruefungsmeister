@@ -1,5 +1,6 @@
 package de.fhdortmund.swt2.pruefungsmeister.client.Controller;
 
+import de.fhdortmund.swt2.pruefungsmeister.client.View.NameDialog;
 import de.fhdortmund.swt2.pruefungsmeister.client.View.TradeDialog;
 import com.google.gson.Gson;
 import de.fhdortmund.swt2.pruefungsmeister.client.Model.*;
@@ -213,7 +214,6 @@ public class MainViewController {
                     });
 
                     socket.connect();
-            socket.emit("join", "Hans");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -401,6 +401,14 @@ public class MainViewController {
 
         initActionHandlers();
         initSocketIO();
+
+        String name = NameDialog.show();
+        if(name == null) {
+            socket.close();
+            System.exit(0);
+        } else {
+            socket.emit("join", name);
+        }
 
     }
 
